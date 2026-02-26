@@ -284,8 +284,12 @@ func (t *ExecTool) guardCommand(command, cwd string) string {
 		pathPattern := regexp.MustCompile(`[A-Za-z]:\\[^\\\"']+|/[^\s\"']+`)
 		splitPattern := regexp.MustCompile(`("[^"]*"|'[^']*'|[\S]+)+`)
 		
-		parts := splitPattern.FindAllString(cmd, -1)
+		cwdPath, err := filepath.Abs(cwd)
+		if err != nil {
+			cwdPath = ""
+		}
 
+		parts := splitPattern.FindAllString(cmd, -1)
 		for _, part := range parts {
 			unquoted, err := strconv.Unquote(part)
 			if err != nil {
@@ -301,13 +305,11 @@ func (t *ExecTool) guardCommand(command, cwd string) string {
 				return "Command blocked by safety guard (path traversal detected)"
 			}
 	
-			cwdPath, err := filepath.Abs(cwd)
-			if err != nil {
-				return ""
+			if cwdPath == "" {
+				continue
 			}
 	
 			matches := pathPattern.FindAllString(part, -1)
-	
 			for _, raw := range matches {
 				p, err := filepath.Abs(raw)
 				if err != nil {
