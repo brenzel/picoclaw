@@ -281,7 +281,9 @@ func (t *ExecTool) guardCommand(command, cwd string) string {
 	}
 
 	if t.restrictToWorkspace {
+		pathPattern := regexp.MustCompile(`[A-Za-z]:\\[^\\\"']+|/[^\s\"']+`)
 		splitPattern := regexp.MustCompile(`("[^"]*"|'[^']*'|[\S]+)+`)
+		
 		parts := splitPattern.FindAllString(cmd, -1)
 
 		for _, part := range parts {
@@ -304,7 +306,6 @@ func (t *ExecTool) guardCommand(command, cwd string) string {
 				return ""
 			}
 	
-			pathPattern := regexp.MustCompile(`[A-Za-z]:\\[^\\\"']+|/[^\s\"']+`)
 			matches := pathPattern.FindAllString(part, -1)
 	
 			for _, raw := range matches {
