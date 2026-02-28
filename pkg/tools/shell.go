@@ -11,8 +11,8 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
-	"strings"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/sipeed/picoclaw/pkg/config"
@@ -283,7 +283,7 @@ func (t *ExecTool) guardCommand(command, cwd string) string {
 	if t.restrictToWorkspace {
 		pathPattern := regexp.MustCompile(`[A-Za-z]:\\[^\\\"']+|/[^\s\"']+`)
 		splitPattern := regexp.MustCompile(`("[^"]*"|'[^']*'|[\S]+)+`)
-		
+
 		cwdPath, err := filepath.Abs(cwd)
 		if err != nil {
 			cwdPath = ""
@@ -300,27 +300,27 @@ func (t *ExecTool) guardCommand(command, cwd string) string {
 			if err == nil && u.Scheme != "" && u.Host != "" {
 				continue
 			}
-			
+
 			if strings.Contains(part, "..\\") || strings.Contains(part, "../") {
 				return "Command blocked by safety guard (path traversal detected)"
 			}
-	
+
 			if cwdPath == "" {
 				continue
 			}
-	
+
 			matches := pathPattern.FindAllString(part, -1)
 			for _, raw := range matches {
 				p, err := filepath.Abs(raw)
 				if err != nil {
 					continue
 				}
-	
+
 				rel, err := filepath.Rel(cwdPath, p)
 				if err != nil {
 					continue
 				}
-	
+
 				if strings.HasPrefix(rel, "..") {
 					return "Command blocked by safety guard (path outside working dir)"
 				}
